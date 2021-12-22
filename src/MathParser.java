@@ -1,12 +1,23 @@
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
 public class MathParser {
 
+    private static DecimalFormat decimalFormat = new DecimalFormat("#.##");
+
     public static String evaluate(String expression) {
+        return evaluate(expression, null);
+    }
+
+    public static String evaluate(String expression, DecimalFormat format) {
         if (expression == null) {
             throw new NullPointerException("expression must not be null");
+        }
+
+        if (format != null) {
+            decimalFormat = format;
         }
 
         return calculate(shuntingYard(tokenizeString(expression)));
@@ -144,6 +155,6 @@ public class MathParser {
             }
         }
 
-        return stack.pop().getValue();
+        return decimalFormat.format(Double.parseDouble(stack.pop().getValue()));
     }
 }
