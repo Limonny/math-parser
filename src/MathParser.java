@@ -1,17 +1,18 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 public class MathParser {
 
     public static String evaluate(String expression) {
+        if (expression == null) {
+            throw new NullPointerException("expression must not be null");
+        }
+
         return null;
     }
 
     private static List<Token> tokenizeString(String input) {
-        if (input == null) {
-            throw new NullPointerException("Input must not be null");
-        }
-
         List<Token> tokens = new ArrayList<>();
 
         for (int i = 0; i < input.length(); i++) {
@@ -43,5 +44,57 @@ public class MathParser {
         }
 
         return tokens;
+    }
+
+    private static List<Token> shuntingYard(List<Token> tokens) {
+        List<Token> result = new ArrayList<>();
+        Stack<Token> stack = new Stack<>();
+
+        for (Token token : tokens) {
+            switch (token.getType()) {
+                case NUMBER -> result.add(token);
+                case LEFT_BRACKET -> stack.push(token);
+                case RIGHT_BRACKET -> {
+                    while (stack.peek().getType() != TokenType.LEFT_BRACKET) {
+                        result.add(stack.pop());
+                    }
+                    stack.pop();
+                }
+                case MUL, DIV -> {
+                    if (stack.empty()) {
+                        stack.push(token);
+                    }
+                    else {
+                        switch (stack.peek().getType()) {
+                            case MUL, DIV -> {
+                                result.add(stack.pop());
+                                stack.push(token);
+                            }
+                            case LEFT_BRACKET, PLUS, MINUS -> stack.push(token);
+                        }
+                    }
+                }
+                case PLUS, MINUS -> {
+                    if (stack.empty()) {
+                        stack.push(token);
+                    }
+                    else {
+                        switch (stack.peek().getType()) {
+                            case MUL, DIV, PLUS, MINUS -> {
+                                result.add(stack.pop());
+                                stack.push(token);
+                            }
+                            case LEFT_BRACKET -> stack.push(token);
+                        }
+                    }
+                }
+            }
+        }
+
+        while (!stack.empty()) {
+            result.add(stack.pop());
+        }
+
+        return result;
     }
 }
