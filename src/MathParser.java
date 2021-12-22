@@ -56,6 +56,7 @@ public class MathParser {
                 case ')' -> tokens.add(new Token(TokenType.RIGHT_BRACKET, ")"));
                 case '*' -> tokens.add(new Token(TokenType.MUL, "*"));
                 case '/' -> tokens.add(new Token(TokenType.DIV, "/"));
+                case '%' -> tokens.add(new Token(TokenType.MOD, "%"));
                 case '+' -> tokens.add(new Token(TokenType.PLUS, "+"));
                 case '-' -> {
                     if (tokens.isEmpty() || tokens.get(tokens.size() - 1).getType() != TokenType.NUMBER) {
@@ -85,13 +86,13 @@ public class MathParser {
                     }
                     stack.pop();
                 }
-                case MUL, DIV -> {
+                case MUL, DIV, MOD -> {
                     if (stack.empty()) {
                         stack.push(token);
                     }
                     else {
                         switch (stack.peek().getType()) {
-                            case MUL, DIV -> {
+                            case MUL, DIV, MOD -> {
                                 result.add(stack.pop());
                                 stack.push(token);
                             }
@@ -105,7 +106,7 @@ public class MathParser {
                     }
                     else {
                         switch (stack.peek().getType()) {
-                            case MUL, DIV, PLUS, MINUS -> {
+                            case MUL, DIV, MOD, PLUS, MINUS -> {
                                 result.add(stack.pop());
                                 stack.push(token);
                             }
@@ -136,11 +137,19 @@ public class MathParser {
                 }
                 case DIV -> {
                     double second = Double.parseDouble(stack.pop().getValue());
-                    if (second == 0) {
-                        throw new ArithmeticException("Division by zero");
-                    }
                     double first = Double.parseDouble(stack.pop().getValue());
+                    if (second == 0) {
+                        throw new ArithmeticException("Division by zero - " + first + " / " + second);
+                    }
                     stack.push(new Token(TokenType.NUMBER, String.valueOf(first / second)));
+                }
+                case MOD -> {
+                    double second = Double.parseDouble(stack.pop().getValue());
+                    double first = Double.parseDouble(stack.pop().getValue());
+                    if (second == 0) {
+                        throw new ArithmeticException("Division by zero - " + first + " % " + second);
+                    }
+                    stack.push(new Token(TokenType.NUMBER, String.valueOf(first % second)));
                 }
                 case PLUS -> {
                     double second = Double.parseDouble(stack.pop().getValue());
