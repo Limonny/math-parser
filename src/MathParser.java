@@ -29,29 +29,7 @@ public class MathParser {
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
             switch (c) {
-                case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' -> {
-                    int x = i + 1;
-                    boolean isDotPresent = false;
-                    while (x < input.length()) {
-                        c = input.charAt(x);
-                        if ((c >= '0' && c <= '9') || c == '.') {
-                            if (c == '.') {
-                                if (!isDotPresent) {
-                                    isDotPresent = true;
-                                }
-                                else {
-                                    throw new InvalidExpressionSyntaxException(input.substring(i, ++x) + " is not a valid number");
-                                }
-                            }
-                            x++;
-                        }
-                        else {
-                            break;
-                        }
-                    }
-                    tokens.add(new Token(TokenType.NUMBER, input.substring(i, x)));
-                    i = x - 1;
-                }
+                case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' -> i = readNumber(input, i, tokens);
                 case '(' -> tokens.add(new Token(TokenType.LEFT_BRACKET, "("));
                 case ')' -> tokens.add(new Token(TokenType.RIGHT_BRACKET, ")"));
                 case '*' -> tokens.add(new Token(TokenType.MUL, "*"));
@@ -60,9 +38,17 @@ public class MathParser {
                 case '+' -> tokens.add(new Token(TokenType.PLUS, "+"));
                 case '-' -> {
                     if (tokens.isEmpty() || tokens.get(tokens.size() - 1).getType() != TokenType.NUMBER) {
-                        tokens.add(new Token(TokenType.NUMBER, "0"));
+                        if (input.charAt(i + 1) == '(') {
+                            tokens.add(new Token(TokenType.NUMBER, "0"));
+                            tokens.add(new Token(TokenType.MINUS, "-"));
+                        }
+                        else {
+                            i = readNumber(input, i, tokens);
+                        }
                     }
-                    tokens.add(new Token(TokenType.MINUS, "-"));
+                    else {
+                        tokens.add(new Token(TokenType.MINUS, "-"));
+                    }
                 }
                 case ' ' -> {}
                 default -> throw new UnsupportedTokenException("Unexpected char '" + c + "' at " + i + " position");
@@ -165,5 +151,30 @@ public class MathParser {
         }
 
         return decimalFormat.format(Double.parseDouble(stack.pop().getValue()));
+    }
+
+    private static int readNumber(String input, int currentPosition, List<Token> tokens) {
+        int x = currentPosition + 1;
+        boolean isDotPresent = false;
+        while (x < input.length()) {
+            char c = input.charAt(x);
+            if ((c >= '0' && c <= '9') || c == '.') {
+                if (c == '.') {
+                    if (!isDotPresent) {
+                        isDotPresent = true;
+                    }
+                    else {
+                        throw new InvalidExpressionSyntaxException(input.substring(currentPosition, ++x) + " is not a valid number");
+                    }
+                }
+                x++;
+            }
+            else {
+                break;
+            }
+        }
+        tokens.add(new Token(TokenType.NUMBER, input.substring(currentPosition, x)));
+        currentPosition = x - 1;
+        return currentPosition;
     }
 }
