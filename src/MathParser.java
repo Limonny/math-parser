@@ -32,6 +32,7 @@ public class MathParser {
                 case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' -> i = readNumber(input, i, tokens);
                 case '(' -> tokens.add(new Token(TokenType.LEFT_BRACKET, "("));
                 case ')' -> tokens.add(new Token(TokenType.RIGHT_BRACKET, ")"));
+                case '^' -> tokens.add(new Token(TokenType.POW, "^"));
                 case '*' -> tokens.add(new Token(TokenType.MUL, "*"));
                 case '/' -> tokens.add(new Token(TokenType.DIV, "/"));
                 case '%' -> tokens.add(new Token(TokenType.MOD, "%"));
@@ -72,13 +73,27 @@ public class MathParser {
                     }
                     stack.pop();
                 }
+                case POW -> {
+                    if (stack.empty()) {
+                        stack.push(token);
+                    }
+                    else {
+                        switch (stack.peek().getType()) {
+                            case POW -> {
+                                result.add(stack.pop());
+                                stack.push(token);
+                            }
+                            case LEFT_BRACKET, MUL, DIV, MOD, PLUS, MINUS -> stack.push(token);
+                        }
+                    }
+                }
                 case MUL, DIV, MOD -> {
                     if (stack.empty()) {
                         stack.push(token);
                     }
                     else {
                         switch (stack.peek().getType()) {
-                            case MUL, DIV, MOD -> {
+                            case POW, MUL, DIV, MOD -> {
                                 result.add(stack.pop());
                                 stack.push(token);
                             }
@@ -92,7 +107,7 @@ public class MathParser {
                     }
                     else {
                         switch (stack.peek().getType()) {
-                            case MUL, DIV, MOD, PLUS, MINUS -> {
+                            case POW, MUL, DIV, MOD, PLUS, MINUS -> {
                                 result.add(stack.pop());
                                 stack.push(token);
                             }
@@ -116,6 +131,11 @@ public class MathParser {
         for (Token token : tokens) {
             switch (token.getType()) {
                 case NUMBER -> stack.push(token);
+                case POW -> {
+                    double second = Double.parseDouble(stack.pop().getValue());
+                    double first = Double.parseDouble(stack.pop().getValue());
+                    stack.push(new Token(TokenType.NUMBER, String.valueOf(Math.pow(first, second))));
+                }
                 case MUL -> {
                     double second = Double.parseDouble(stack.pop().getValue());
                     double first = Double.parseDouble(stack.pop().getValue());
