@@ -37,7 +37,12 @@ public class MathParser {
                 case '*' -> tokens.add(new Token(TokenType.MUL, "*"));
                 case '/' -> tokens.add(new Token(TokenType.DIV, "/"));
                 case '+' -> tokens.add(new Token(TokenType.PLUS, "+"));
-                case '-' -> tokens.add(new Token(TokenType.MINUS, "-"));
+                case '-' -> {
+                    if (tokens.isEmpty() || tokens.get(tokens.size() - 1).getType() != TokenType.NUMBER) {
+                        tokens.add(new Token(TokenType.NUMBER, "0"));
+                    }
+                    tokens.add(new Token(TokenType.MINUS, "-"));
+                }
                 case ' ' -> {}
                 default -> throw new UnsupportedTokenException("Unexpected char '" + c + "' at " + i + " position");
             }
