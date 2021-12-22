@@ -9,7 +9,7 @@ public class MathParser {
             throw new NullPointerException("expression must not be null");
         }
 
-        return null;
+        return calculate(shuntingYard(tokenizeString(expression)));
     }
 
     private static List<Token> tokenizeString(String input) {
@@ -96,5 +96,40 @@ public class MathParser {
         }
 
         return result;
+    }
+
+    private static String calculate(List<Token> tokens) {
+        Stack<Token> stack = new Stack<>();
+
+        for (Token token : tokens) {
+            switch (token.getType()) {
+                case NUMBER -> stack.push(token);
+                case MUL -> {
+                    double second = Double.parseDouble(stack.pop().getValue());
+                    double first = Double.parseDouble(stack.pop().getValue());
+                    stack.push(new Token(TokenType.NUMBER, String.valueOf(first * second)));
+                }
+                case DIV -> {
+                    double second = Double.parseDouble(stack.pop().getValue());
+                    if (second == 0) {
+                        throw new ArithmeticException("Division by zero");
+                    }
+                    double first = Double.parseDouble(stack.pop().getValue());
+                    stack.push(new Token(TokenType.NUMBER, String.valueOf(first / second)));
+                }
+                case PLUS -> {
+                    double second = Double.parseDouble(stack.pop().getValue());
+                    double first = Double.parseDouble(stack.pop().getValue());
+                    stack.push(new Token(TokenType.NUMBER, String.valueOf(first + second)));
+                }
+                case MINUS -> {
+                    double second = Double.parseDouble(stack.pop().getValue());
+                    double first = Double.parseDouble(stack.pop().getValue());
+                    stack.push(new Token(TokenType.NUMBER, String.valueOf(first - second)));
+                }
+            }
+        }
+
+        return stack.pop().getValue();
     }
 }
