@@ -20,9 +20,18 @@ public class MathParser {
             switch (c) {
                 case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' -> {
                     int x = i + 1;
+                    boolean isDotPresent = false;
                     while (x < input.length()) {
                         c = input.charAt(x);
-                        if (c >= '0' && c <= '9') {
+                        if ((c >= '0' && c <= '9') || c == '.') {
+                            if (c == '.') {
+                                if (!isDotPresent) {
+                                    isDotPresent = true;
+                                }
+                                else {
+                                    throw new InvalidExpressionSyntaxException(input.substring(i, ++x) + " is not a valid number");
+                                }
+                            }
                             x++;
                         }
                         else {
