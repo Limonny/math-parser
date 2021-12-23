@@ -1,10 +1,10 @@
-##Mathematical Expression Parser
+## Mathematical Expression Parser
 
 ---
 The result is outputted with an accuracy of two digits, using the standard rounding mode.
 A custom DecimalFormat class can be provided to change this behavior.
 
-###List of supported operations and features:
+### List of supported operations and features:
 * plus
 * minus
 * multiplication
