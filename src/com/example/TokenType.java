@@ -1,3 +1,5 @@
+package com.example;
+
 public enum TokenType {
     NUMBER,
     LEFT_BRACKET, RIGHT_BRACKET,
