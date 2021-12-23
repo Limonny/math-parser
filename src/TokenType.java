@@ -1,7 +1,7 @@
 public enum TokenType {
     NUMBER,
     LEFT_BRACKET, RIGHT_BRACKET,
-    POW,
+    POW, SIN, COS, TAN,
     MUL, DIV, MOD,
     PLUS, MINUS
 }

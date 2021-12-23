@@ -33,6 +33,36 @@ public class MathParser {
                 case '(' -> tokens.add(new Token(TokenType.LEFT_BRACKET, "("));
                 case ')' -> tokens.add(new Token(TokenType.RIGHT_BRACKET, ")"));
                 case '^' -> tokens.add(new Token(TokenType.POW, "^"));
+                case 's' -> {
+                    String str = input.substring(i, i + 4);
+                    if (str.equals("sin(")) {
+                        tokens.add(new Token(TokenType.SIN, "sin"));
+                    }
+                    else {
+                        throw new InvalidExpressionSyntaxException("Unexpected char sequence: " + str);
+                    }
+                    i = i + 2;
+                }
+                case 'c' -> {
+                    String str = input.substring(i, i + 4);
+                    if (str.equals("cos(")) {
+                        tokens.add(new Token(TokenType.COS, "cos"));
+                    }
+                    else {
+                        throw new InvalidExpressionSyntaxException("Unexpected char sequence: " + str);
+                    }
+                    i = i + 2;
+                }
+                case 't' -> {
+                    String str = input.substring(i, i + 4);
+                    if (str.equals("tan(")) {
+                        tokens.add(new Token(TokenType.TAN, "tan"));
+                    }
+                    else {
+                        throw new InvalidExpressionSyntaxException("Unexpected char sequence: " + str);
+                    }
+                    i = i + 2;
+                }
                 case '*' -> tokens.add(new Token(TokenType.MUL, "*"));
                 case '/' -> tokens.add(new Token(TokenType.DIV, "/"));
                 case '%' -> tokens.add(new Token(TokenType.MOD, "%"));
@@ -73,13 +103,13 @@ public class MathParser {
                     }
                     stack.pop();
                 }
-                case POW -> {
+                case POW, SIN, COS, TAN -> {
                     if (stack.empty()) {
                         stack.push(token);
                     }
                     else {
                         switch (stack.peek().getType()) {
-                            case POW -> {
+                            case POW, SIN, COS, TAN -> {
                                 result.add(stack.pop());
                                 stack.push(token);
                             }
@@ -93,7 +123,7 @@ public class MathParser {
                     }
                     else {
                         switch (stack.peek().getType()) {
-                            case POW, MUL, DIV, MOD -> {
+                            case POW, SIN, COS, TAN, MUL, DIV, MOD -> {
                                 result.add(stack.pop());
                                 stack.push(token);
                             }
@@ -107,7 +137,7 @@ public class MathParser {
                     }
                     else {
                         switch (stack.peek().getType()) {
-                            case POW, MUL, DIV, MOD, PLUS, MINUS -> {
+                            case POW, SIN, COS, TAN, MUL, DIV, MOD, PLUS, MINUS -> {
                                 result.add(stack.pop());
                                 stack.push(token);
                             }
@@ -135,6 +165,18 @@ public class MathParser {
                     double second = Double.parseDouble(stack.pop().getValue());
                     double first = Double.parseDouble(stack.pop().getValue());
                     stack.push(new Token(TokenType.NUMBER, String.valueOf(Math.pow(first, second))));
+                }
+                case SIN -> {
+                    double first = Double.parseDouble(stack.pop().getValue());
+                    stack.push(new Token(TokenType.NUMBER, String.valueOf(Math.sin(Math.toRadians(first)))));
+                }
+                case COS -> {
+                    double first = Double.parseDouble(stack.pop().getValue());
+                    stack.push(new Token(TokenType.NUMBER, String.valueOf(Math.cos(Math.toRadians(first)))));
+                }
+                case TAN -> {
+                    double first = Double.parseDouble(stack.pop().getValue());
+                    stack.push(new Token(TokenType.NUMBER, String.valueOf(Math.tan(Math.toRadians(first)))));
                 }
                 case MUL -> {
                     double second = Double.parseDouble(stack.pop().getValue());
