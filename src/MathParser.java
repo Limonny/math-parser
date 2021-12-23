@@ -1,11 +1,18 @@
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
 public class MathParser {
 
-    private static DecimalFormat decimalFormat = new DecimalFormat("#.##");
+    private static DecimalFormat decimalFormat;
+
+    static {
+        DecimalFormatSymbols decimalFormatSymbols = DecimalFormatSymbols.getInstance();
+        decimalFormatSymbols.setDecimalSeparator('.');
+        decimalFormat = new DecimalFormat("#.##", decimalFormatSymbols);
+    }
 
     public static String evaluate(String expression) {
         return evaluate(expression, null);
@@ -69,12 +76,17 @@ public class MathParser {
                 case '+' -> tokens.add(new Token(TokenType.PLUS, "+"));
                 case '-' -> {
                     if (tokens.isEmpty() || tokens.get(tokens.size() - 1).getType() != TokenType.NUMBER) {
-                        if (input.charAt(i + 1) == '(') {
-                            tokens.add(new Token(TokenType.NUMBER, "0"));
+                        if (!tokens.isEmpty() && tokens.get(tokens.size() - 1).getType() == TokenType.RIGHT_BRACKET) {
                             tokens.add(new Token(TokenType.MINUS, "-"));
                         }
                         else {
-                            i = readNumber(input, i, tokens);
+                            c = input.charAt(i + 1);
+                            if (c == '(' || c == 's' || c == 'c' || c == 't') {
+                                tokens.add(new Token(TokenType.NUMBER, "-1"));
+                                tokens.add(new Token(TokenType.MUL, "*"));
+                            } else {
+                                i = readNumber(input, i, tokens);
+                            }
                         }
                     }
                     else {
@@ -164,7 +176,11 @@ public class MathParser {
                 case POW -> {
                     double second = Double.parseDouble(stack.pop().getValue());
                     double first = Double.parseDouble(stack.pop().getValue());
-                    stack.push(new Token(TokenType.NUMBER, String.valueOf(Math.pow(first, second))));
+                    double pow = Math.pow(first, second);
+                    if (first < 0) {
+                        pow = -1 * pow;
+                    }
+                    stack.push(new Token(TokenType.NUMBER, String.valueOf(pow)));
                 }
                 case SIN -> {
                     double first = Double.parseDouble(stack.pop().getValue());
